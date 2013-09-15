@@ -1,37 +1,31 @@
 /*
 
-Project:      Virtual dunk tank
+Project:      Virtual sprayer receiver
 Author:       Jason Lawley
-Date:         9/3/12
+Date:         9/15/13
 
-Description:  The following is code is to create a 'Virtual Dunk Tank'
-or VDT.  The VDT replaces a conventional dunk tank.  Instead, the person
-to be dunked sits in front of three sprinklers.  The sprinklers are controlled
-by three different vavles that can be turned on independently.
+Description:  The following is code is to create a 'Virtual Sprayer Receiver'
+or VSRX.  The VSRX, when paired with a Virtual Sprayer Transmitter (VSTX)
+replaces a conventional dunk tank.  The person to be dunked sits in front of 
+three sprayer heads.  The sprayer heads are controlled by three different valves 
+that can be independently controlled.
 
-There are two inputs to the VDT - one is the big red button (BRB) that will have 
-a ball thrown at it.  When the BRB is hit, it will cause the three valves
-to open can soak the dunkee.  There are three independent valvues that are
-controlled to to create different displays of water or to 'dunk' the dunkee
+There are two inputs to the VSRX - one is the a wireless receiver that will have 
+will have data sent to it by the VSTX.  When the VSTX indicates a 'hit', 
+the VSRX will cause the three valves to open can soak the dunkee.  The three independent 
+valves are controlled to to create different displays of water or to 'dunk' the dunkee
 to varying degrees of drenchedness.
 
 There is also a discreet little black button (LBB) located at the controller  
 that when pressed will also act as if the BRB had been depressed.  This
-eliminates the need for the VDT monitor to run up and press the button when
-they deem it should have soaked the dunkee because the BRB was hit,
-but the did not trigger.
-
-Finally, the big red button also has an independently controlled LED that will
-light up when either the BRB or the LBB have been depressed.
+LBB is used for testing purposes or to manually trigger a spraying event.
  
  */
  
- // This is a test
 
  // Constant pin connections
 const int LBB         = 4;    // Little black button
 const int BRB         = 7;    // Big red button
-const volatile int BRB_LED     = 5;    // Big red button LED
 const int LED_0       = 13;   // On-board LED
 const int CTRL_0      = 12;   // Valve control
 const int CTRL_1      = 10;   // Valve control
@@ -59,7 +53,6 @@ void setup(){
   pinMode(CTRL_0, OUTPUT);
   pinMode(CTRL_1, OUTPUT);
   pinMode(CTRL_2, OUTPUT);
-  pinMode(BRB_LED, OUTPUT);
   
   randomSeed(analogRead(A0)); //Seed the pseudo-random engine with some true randomness.
 
@@ -131,7 +124,6 @@ void loop(){
   
  
   // Turn everything off
-  digitalWrite (BRB_LED, LOW);
   all_valves_off();
   buttonPush = LOW;
 
@@ -161,19 +153,6 @@ void all_valves_on (){
   digitalWrite (CTRL_1, HIGH);
   digitalWrite (CTRL_2, HIGH);
 }
-
-
-// Flash the BRB
-void flash_BRB () {
- Serial.println("Flash BRB");
-  for (int i=0; i <= 40; i++) {
-    digitalWrite (BRB_LED, HIGH);
-    delay (50);
-    digitalWrite (BRB_LED, LOW);
-    delay (30);
-  }
-}
-
 
 
 // Turn on the valves from left to right
