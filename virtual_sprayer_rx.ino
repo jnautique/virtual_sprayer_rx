@@ -112,6 +112,16 @@ void loop(){
       buttonPush = HIGH;
   }
   
+  // Blink board LED 5 time when we either get a signal or the button
+  // is pressed.
+  for (int i = 0; i < 5; i++) {
+    digitalWrite(LED_0, true);
+    delay(50);
+    digitalWrite(LED_0, false);
+    delay(50);
+  }
+  
+  
   // Here we select one of 8 different patterns to implement
   rand_select = random(8);
   Serial.println("Random pattern selected is:");
