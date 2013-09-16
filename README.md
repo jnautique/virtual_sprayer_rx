@@ -5,9 +5,10 @@ Inputs
 Button
 Wireless receiver (serial input)
 
-Output
-------
+Outputs
+-------
 x3 - valve control
+Board LED
 
 
 Day in the Life
