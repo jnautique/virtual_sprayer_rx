@@ -1,3 +1,4 @@
+
 /*
 
 Project:      Virtual sprayer receiver
@@ -14,18 +15,20 @@ There are two inputs to the VSRX - one is the a wireless receiver that will have
 will have data sent to it by the VSTX.  When the VSTX indicates a 'hit', 
 the VSRX will cause the three valves to open can soak the dunkee.  The three independent 
 valves are controlled to to create different displays of water or to 'dunk' the dunkee
-to varying degrees of drenchedness.
+with varying degrees of drenchedness.
 
-There is also a discreet little black button (LBB) located at the controller  
-that when pressed will also act as if the BRB had been depressed.  This
-LBB is used for testing purposes or to manually trigger a spraying event.
+A small little black button (LBB) located at the receiver box that when  
+pressed will trigger the spraying to start.  This LBB is used for testing 
+purposes or to manually trigger a spraying event.
  
  */
  
 
+#include <VirtualWire.h>
+
  // Constant pin connections
 const int LBB         = 4;    // Little black button
-const int BRB         = 7;    // Big red button
+const int RX          = 2;
 const int LED_0       = 13;   // On-board LED
 const int CTRL_0      = 12;   // Valve control
 const int CTRL_1      = 10;   // Valve control
@@ -43,10 +46,11 @@ void setup(){
   //start serial connection
   Serial.begin(9600);
   // Configure input and output pins
+  Serial.println("Start of setup");
+  
   
   // Pushbutton inputs with internal pull-up resistor
   pinMode(LBB, INPUT_PULLUP);
-  pinMode(BRB, INPUT_PULLUP);
   
   // Outputs
   pinMode(LED_0, OUTPUT); 
@@ -55,6 +59,12 @@ void setup(){
   pinMode(CTRL_2, OUTPUT);
   
   randomSeed(analogRead(A0)); //Seed the pseudo-random engine with some true randomness.
+  
+  // Setup for the virtual_wire library
+  vw_set_ptt_inverted(true);  // Required for DR3100
+  vw_setup(2000);             // Bits per sec
+  vw_set_rx_pin(RX);
+  vw_rx_start();              // Start the receiver PLL running
 
   
   all_valves_on();
@@ -68,29 +78,41 @@ void loop(){
   
   Serial.println("Start of loop");
   
-  // Wait for one of the buttons to be pushed
+  // Declare the buffers for the virtual wire
+  uint8_t buf[VW_MAX_MESSAGE_LEN];
+  uint8_t buflen = VW_MAX_MESSAGE_LEN;
+  
+  
+  // Wait for a good message to be received via the wireless receiver 
+  // or the LBB to be pressed.  When one of these happens, exit and start 
+  // the spraying sequence.
   while (buttonPush == LOW) {
-    BRBState = digitalRead(BRB);
-    LBBState = digitalRead(LBB);
-    if (!BRBState | !LBBState)
+  
+  if (vw_get_message(buf, &buflen)) { // Non-blocking
+    
+    int i;
+
+    digitalWrite(LED_0, true); // Flash a light to show received good message
+    // Message with a good checksum received, dump it.
+    Serial.print("Got: ");
+  
+    for (i = 0; i < buflen; i++) {
+      Serial.print(buf[i], HEX);
+      Serial.print(" ");
+    }
+  
+    Serial.println("");
+        digitalWrite(LED_0, false);
+        
+    buttonPush = HIGH;
+  }
+  
+  LBBState = digitalRead(LBB);
+    if (!LBBState)
       buttonPush = HIGH;
   }
-
-  if (BRBState == LOW) {
-    Serial.println("BRB Pressed");
-  } else {
-    Serial.println("LBB Pressed");
-  } 
   
-  Serial.println("Get ready to flash BRB");
-  flash_BRB();
-  
-  // Temporary counter
- //if (counter == 7)
- //   counter = 0;
- // else
- //   counter++;
-
+  // Here we select one of 8 different patterns to implement
   rand_select = random(8);
   Serial.println("Random pattern selected is:");
   Serial.println(rand_select, DEC);
