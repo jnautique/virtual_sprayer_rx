@@ -61,7 +61,7 @@ void setup(){
   randomSeed(analogRead(A0)); //Seed the pseudo-random engine with some true randomness.
   
   // Setup for the virtual_wire library
-  vw_set_ptt_inverted(true);  // Required for DR3100
+  //vw_set_ptt_inverted(true);  // Required for DR3100
   vw_setup(2000);             // Bits per sec
   vw_set_rx_pin(RX);
   vw_rx_start();              // Start the receiver PLL running
